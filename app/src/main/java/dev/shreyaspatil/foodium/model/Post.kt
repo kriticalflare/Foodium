@@ -26,11 +26,14 @@ package dev.shreyaspatil.foodium.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 import dev.shreyaspatil.foodium.model.Post.Companion.TABLE_NAME
 
 /**
  * Data class for Database entity and Serialization.
  */
+@JsonClass(generateAdapter = true)
 @Entity(tableName = TABLE_NAME)
 data class Post(
 

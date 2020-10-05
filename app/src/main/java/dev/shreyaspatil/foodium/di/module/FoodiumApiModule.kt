@@ -44,9 +44,7 @@ class FoodiumApiModule {
     fun provideRetrofitService(): FoodiumService = Retrofit.Builder()
         .baseUrl(FoodiumService.FOODIUM_API_URL)
         .addConverterFactory(
-            MoshiConverterFactory.create(
-                Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-            )
+            MoshiConverterFactory.create()
         )
         .build()
         .create(FoodiumService::class.java)

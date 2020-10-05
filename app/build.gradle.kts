@@ -118,6 +118,9 @@ dependencies {
     implementation(Compose.material)
     implementation(Compose.uiTooling)
 
+    // Accompanist
+    implementation(Dependencies.coilAccompanist)
+
     // Architecture Components
     implementation(Lifecycle.viewModel)
     implementation(Lifecycle.liveData)
