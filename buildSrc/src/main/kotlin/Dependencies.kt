@@ -9,9 +9,9 @@ object Testing {
 }
 
 object Dependencies {
-    const val kotlin = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.0"
-    const val kotlinGradle = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.0"
-    const val gradle = "com.android.tools.build:gradle:4.0.1"
+    const val kotlin = "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.10"
+    const val kotlinGradle = "org.jetbrains.kotlin:kotlin-gradle-plugin:1.4.10"
+    const val gradle = "com.android.tools.build:gradle:4.2.0-alpha13"
     const val daggerHilt = "com.google.dagger:hilt-android-gradle-plugin:2.28-alpha"
     const val ktLint = "org.jlleitschuh.gradle:ktlint-gradle:9.2.1"
     const val materialDesign = "com.google.android.material:material:1.1.0"
@@ -58,4 +58,11 @@ object Room {
     const val compiler = "androidx.room:room-compiler:2.2.5"
     const val ktx = "androidx.room:room-ktx:2.2.5"
     const val runtime = "androidx.room:room-runtime:2.2.5"
+}
+
+object Compose {
+    const val composeVersion = "1.0.0-alpha04"
+    const val ui =  "androidx.compose.ui:ui:$composeVersion"
+    const val material =  "androidx.compose.material:material:$composeVersion"
+    const val uiTooling = "androidx.ui:ui-tooling:$composeVersion"
 }

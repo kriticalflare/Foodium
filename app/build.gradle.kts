@@ -1,3 +1,5 @@
+import org.gradle.internal.impldep.org.junit.experimental.categories.Categories.CategoryFilter.exclude
+
 /*
  * MIT License
  *
@@ -33,7 +35,7 @@ plugins {
 
 android {
     compileSdkVersion(30)
-    buildToolsVersion("30.0.0")
+    buildToolsVersion("30.0.2")
 
     defaultConfig {
         applicationId = "dev.shreyaspatil.foodium"
@@ -57,7 +59,10 @@ android {
         }
     }
 
-    buildFeatures.viewBinding = true
+    buildFeatures{
+        viewBinding = true
+        compose = true
+    }
 
     buildTypes {
         getByName("release") {
@@ -74,6 +79,11 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
 
+    composeOptions {
+        kotlinCompilerExtensionVersion = Compose.composeVersion
+        kotlinCompilerVersion = "1.4.10"
+    }
+
     packagingOptions {
         exclude("META-INF/*.kotlin_module")
     }
@@ -82,6 +92,7 @@ android {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     kotlinOptions {
         jvmTarget = "1.8"
+        useIR = true
     }
 }
 
@@ -101,6 +112,11 @@ dependencies {
     implementation(Android.coreKtx)
     implementation(Android.constraintLayout)
     implementation(Android.swipeRefreshLayout)
+
+    // Jetpack Compose
+    implementation(Compose.ui)
+    implementation(Compose.material)
+    implementation(Compose.uiTooling)
 
     // Architecture Components
     implementation(Lifecycle.viewModel)
