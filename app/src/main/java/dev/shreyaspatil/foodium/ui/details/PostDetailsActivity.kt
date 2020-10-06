@@ -25,87 +25,56 @@
 package dev.shreyaspatil.foodium.ui.details
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.ui.platform.setContent
 import androidx.core.app.ShareCompat
-import coil.load
 import dagger.hilt.android.AndroidEntryPoint
 import dev.shreyaspatil.foodium.R
-import dev.shreyaspatil.foodium.databinding.ActivityPostDetailsBinding
 import dev.shreyaspatil.foodium.model.Post
-import dev.shreyaspatil.foodium.ui.base.BaseActivity
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 @ExperimentalCoroutinesApi
 @AndroidEntryPoint
-class PostDetailsActivity : BaseActivity<PostDetailsViewModel, ActivityPostDetailsBinding>() {
+class PostDetailsActivity : AppCompatActivity() {
 
-    override val mViewModel: PostDetailsViewModel by viewModels()
-
-    private lateinit var post: Post
+    val mViewModel: PostDetailsViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(mViewBinding.root)
-
-        setSupportActionBar(mViewBinding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
         val postId = intent.extras?.getInt(POST_ID)
             ?: throw IllegalArgumentException("`postId` must be non-null")
 
-        initPost(postId)
-    }
-
-    private fun initPost(postId: Int) {
-        mViewModel.getPost(postId).observe(this) { post ->
-            mViewBinding.postContent.apply {
-                this@PostDetailsActivity.post = post
-
-                postTitle.text = post.title
-                postAuthor.text = post.author
-                postBody.text = post.body
-            }
-            mViewBinding.imageView.load(post.imageUrl)
+        val navigateBack = {
+            finish()
         }
-    }
 
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.detail_menu, menu)
-        return true
-    }
+        val shareMsg = { post: Post ->
+            val shareMsg = getString(
+                R.string.share_message,
+                post.title,
+                post.author
+            )
 
-    override fun getViewBinding(): ActivityPostDetailsBinding =
-        ActivityPostDetailsBinding.inflate(layoutInflater)
+            val intent = ShareCompat.IntentBuilder.from(this)
+                .setType("text/plain")
+                .setText(shareMsg)
+                .intent
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            android.R.id.home -> {
-                supportFinishAfterTransition()
-                return true
-            }
-
-            R.id.action_share -> {
-                val shareMsg = getString(
-                    R.string.share_message,
-                    post.title,
-                    post.author
-                )
-
-                val intent = ShareCompat.IntentBuilder.from(this)
-                    .setType("text/plain")
-                    .setText(shareMsg)
-                    .intent
-
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                }
-                return true
+            if (intent.resolveActivity(packageManager) != null) {
+                startActivity(intent)
             }
         }
 
-        return super.onOptionsItemSelected(item)
+        setContent {
+            PostDetails(
+                postDetailsViewModel = mViewModel,
+                postId,
+                onNavIconClick = navigateBack,
+                onShareIconClick = shareMsg
+            )
+        }
     }
 
     companion object {
