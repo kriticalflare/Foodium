@@ -1,19 +1,18 @@
 package dev.shreyaspatil.foodium.ui.details
 
-import androidx.compose.foundation.Icon
-import androidx.compose.foundation.ScrollableColumn
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.animation.animate
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawOpacity
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.ConfigurationAmbient
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -23,6 +22,7 @@ import dev.chrisbanes.accompanist.coil.CoilImage
 import dev.shreyaspatil.foodium.R
 import dev.shreyaspatil.foodium.model.Post
 import dev.shreyaspatil.foodium.ui.theme.FoodiumTheme
+import kotlin.math.min
 
 @Composable
 fun PostDetails(
@@ -34,15 +34,22 @@ fun PostDetails(
     val post by postDetailsViewModel.getPost(postId).asFlow()
         .collectAsState(initial = Post(id = -1))
     if (post.id != -1) {
+        val scrollState = rememberScrollState()
         FoodiumTheme {
-            Scaffold(topBar = {
-                PostDetailsAppbar(
-                    post,
-                    onNavIconClick,
-                    onShareIconClick
-                )
-            }) { innerPadding ->
-                PostDetailBody(post = post, modifier = Modifier.padding(innerPadding))
+            Scaffold { innerPadding ->
+                Box(modifier = Modifier.fillMaxSize()) {
+                    PostDetailBody(
+                        post = post,
+                        scrollState = scrollState,
+                        modifier = Modifier.padding(innerPadding)
+                    )
+                    PostDetailsAppbar(
+                        post,
+                        scrollState,
+                        onNavIconClick,
+                        onShareIconClick
+                    )
+                }
             }
         }
     }
@@ -52,39 +59,54 @@ fun PostDetails(
 @Composable
 private fun PostDetailsAppbar(
     post: Post,
+    scrollState: ScrollState,
     onNavIconClick: () -> Unit,
     onShareIconClick: (Post) -> Unit
 ) {
-    TopAppBar(
-        title = { Text("Foodium") },
-        navigationIcon = {
-            IconButton(onClick = onNavIconClick) {
+    /*
+     To mimic collapsing toolbar behaviour, we animate in and out the `title` text.
+     */
+    val titleOpacity = min(scrollState.value / 250, 1f) == 1f
+    val animatedOpacity = animate(if (titleOpacity) 1f else 0f)
+
+    Surface(
+        color = MaterialTheme.colors.background.copy(alpha = animatedOpacity),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().height(56.dp)
+        ) {
+            IconButton(onClick = onNavIconClick,modifier = Modifier.padding(horizontal = 8.dp)) {
                 Icon(
                     asset = vectorResource(id = R.drawable.ic_arrow_back_24)
                 )
             }
-        },
-        actions = {
+            Text(
+                "Foodium",
+                style = MaterialTheme.typography.h6,
+                modifier = Modifier.padding(horizontal = 16.dp).drawOpacity(animatedOpacity)
+            )
+            Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = { onShareIconClick(post) }) {
                 Icon(
                     asset = vectorResource(id = R.drawable.ic_share)
                 )
             }
-        },
-        backgroundColor = MaterialTheme.colors.background
-    )
+        }
+    }
 }
 
 @Composable
-private fun PostDetailBody(post: Post, modifier: Modifier = Modifier) {
-    ScrollableColumn(modifier = modifier) {
+private fun PostDetailBody(post: Post, scrollState: ScrollState, modifier: Modifier = Modifier) {
+    ScrollableColumn(scrollState = scrollState, modifier = modifier) {
         val horizontalPadding = 16.dp
         val verticalPadding = 4.dp
         CoilImage(
             data = post.imageUrl ?: "",
             fadeIn = true,
             contentScale = ContentScale.FillWidth,
-            modifier = Modifier.fillMaxWidth().height(192.dp).padding(bottom = verticalPadding + 4.dp)
+            modifier = Modifier.fillMaxWidth().height(192.dp)
+                .padding(bottom = verticalPadding + 4.dp)
         )
         Text(
             post.title ?: "",
@@ -97,7 +119,8 @@ private fun PostDetailBody(post: Post, modifier: Modifier = Modifier) {
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = horizontalPadding, vertical = verticalPadding)
+            modifier = Modifier.fillMaxWidth()
+                .padding(horizontal = horizontalPadding, vertical = verticalPadding)
         ) {
             Icon(asset = vectorResource(id = R.drawable.ic_person))
             ProvideEmphasis(emphasis = EmphasisAmbient.current.medium) {
@@ -113,5 +136,7 @@ private fun PostDetailBody(post: Post, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.body2,
             modifier = Modifier.padding(horizontal = horizontalPadding, vertical = verticalPadding)
         )
+        val extraPadding = ConfigurationAmbient.current.screenHeightDp * 0.75
+        Spacer(modifier = Modifier.fillMaxWidth().height(extraPadding.dp))
     }
 }
