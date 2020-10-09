@@ -1,16 +1,17 @@
 package dev.shreyaspatil.foodium.ui.main
 
 import android.widget.Toast
-import androidx.compose.foundation.Icon
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.Text
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumnForIndexed
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ConfigurationAmbient
 import androidx.compose.ui.platform.ContextAmbient
@@ -23,18 +24,28 @@ import dev.shreyaspatil.foodium.R
 import dev.shreyaspatil.foodium.model.Post
 import dev.shreyaspatil.foodium.model.State
 import dev.shreyaspatil.foodium.ui.theme.FoodiumTheme
+import dev.shreyaspatil.foodium.utils.NetworkUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
+@ExperimentalAnimationApi
 @Composable
-fun MainContent(viewModel: MainViewModel,darkTheme: Boolean,toggleTheme: () -> Unit, onPostClicked: (Post) -> Unit) {
+fun MainContent(
+    viewModel: MainViewModel,
+    darkTheme: Boolean,
+    toggleTheme: () -> Unit,
+    onPostClicked: (Post) -> Unit
+) {
     FoodiumTheme(darkTheme) {
         Scaffold(topBar = { FoodiumAppBar(toggleTheme) }) { innerPadding ->
             Surface(color = MaterialTheme.colors.background) {
-                PostsList(
-                    mainViewModel = viewModel,
-                    modifier = Modifier.padding(innerPadding),
-                    onPostClicked
-                )
+                Box {
+                    PostsList(
+                        mainViewModel = viewModel,
+                        modifier = Modifier.padding(innerPadding),
+                        onPostClicked
+                    )
+                    NetworkConnectivityIndicator()
+                }
             }
         }
     }
@@ -132,4 +143,25 @@ private fun PostsItem(post: Post, onPostClicked: (Post) -> Unit) {
         )
     }
     Divider(Modifier.fillMaxWidth())
+}
+
+@ExperimentalAnimationApi
+@Composable
+private fun NetworkConnectivityIndicator() {
+    val context = ContextAmbient.current
+    val isConnected by NetworkUtils.getNetworkLiveData(context).asFlow()
+        .collectAsState(initial = true)
+    AnimatedVisibility(visible = !isConnected) {
+        Indicator()
+    }
+}
+
+@Composable
+private fun Indicator() {
+    Row(
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth().background(Color.Red)
+    ) {
+        Text("No Connection", modifier = Modifier.padding(4.dp))
+    }
 }
