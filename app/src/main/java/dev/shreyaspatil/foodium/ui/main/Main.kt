@@ -3,9 +3,9 @@ package dev.shreyaspatil.foodium.ui.main
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumnForIndexed
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.ConfigurationAmbient
 import androidx.compose.ui.platform.ContextAmbient
 import androidx.compose.ui.res.stringResource
@@ -38,15 +39,55 @@ fun MainContent(
     FoodiumTheme(darkTheme) {
         Scaffold(topBar = { FoodiumAppBar(toggleTheme) }) { innerPadding ->
             Surface(color = MaterialTheme.colors.background) {
-                Box {
+
+                val context = ContextAmbient.current
+                val isConnected by NetworkUtils.getNetworkLiveData(context).asFlow()
+                    .collectAsState(initial = true)
+
+                ConstraintLayout(PostsConstraints(isConnected)) {
                     PostsList(
                         mainViewModel = viewModel,
-                        modifier = Modifier.padding(innerPadding),
+                        modifier = Modifier.layoutId("posts_list").padding(innerPadding),
                         onPostClicked
                     )
-                    NetworkConnectivityIndicator()
+                    NetworkConnectivityIndicator(isConnected,modifier = Modifier.layoutId("network_indicator"))
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun PostsConstraints(isConnected: Boolean): ConstraintSet {
+
+    if (isConnected) {
+        return ConstraintSet {
+            val postsList = createRefFor("posts_list")
+
+            constrain(postsList) {
+                top.linkTo(parent.top)
+                start.linkTo(parent.start)
+                end.linkTo(parent.end)
+                bottom.linkTo(parent.bottom)
+            }
+        }
+    }
+
+    return ConstraintSet {
+        val networkIndicator = createRefFor("network_indicator")
+        val postsList = createRefFor("posts_list")
+
+        constrain(networkIndicator) {
+            top.linkTo(parent.top)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+
+        }
+        constrain(postsList) {
+            top.linkTo(networkIndicator.bottom)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+            bottom.linkTo(parent.bottom)
         }
     }
 }
@@ -147,20 +188,17 @@ private fun PostsItem(post: Post, onPostClicked: (Post) -> Unit) {
 
 @ExperimentalAnimationApi
 @Composable
-private fun NetworkConnectivityIndicator() {
-    val context = ContextAmbient.current
-    val isConnected by NetworkUtils.getNetworkLiveData(context).asFlow()
-        .collectAsState(initial = true)
-    AnimatedVisibility(visible = !isConnected) {
+private fun NetworkConnectivityIndicator(isConnected: Boolean, modifier: Modifier = Modifier) {
+    AnimatedVisibility(visible = !isConnected, enter = slideInVertically(), modifier = modifier) {
         Indicator()
     }
 }
 
 @Composable
-private fun Indicator() {
+private fun Indicator(modifier: Modifier = Modifier) {
     Row(
         horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth().background(Color.Red)
+        modifier = Modifier.fillMaxWidth().background(Color.Red).then(modifier)
     ) {
         Text("No Connection", modifier = Modifier.padding(4.dp))
     }
