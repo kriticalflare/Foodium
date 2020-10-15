@@ -123,7 +123,7 @@ private fun PostDetailBody(post: Post, scrollState: ScrollState, modifier: Modif
                 .padding(horizontal = horizontalPadding, vertical = verticalPadding)
         ) {
             Icon(asset = vectorResource(id = R.drawable.ic_person))
-            ProvideEmphasis(emphasis = EmphasisAmbient.current.medium) {
+            ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
                 Text(
                     post.author ?: "",
                     style = MaterialTheme.typography.body2

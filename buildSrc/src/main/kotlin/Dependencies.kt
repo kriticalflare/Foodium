@@ -17,7 +17,7 @@ object Dependencies {
     const val materialDesign = "com.google.android.material:material:1.2.0"
     const val materialDialog = "com.shreyaspatil:MaterialDialog:2.1"
     const val coil = "io.coil-kt:coil:0.9.5"
-    const val coilAccompanist =  "dev.chrisbanes.accompanist:accompanist-coil:0.3.0"
+    const val coilAccompanist =  "dev.chrisbanes.accompanist:accompanist-coil:0.3.1"
 }
 
 object Lifecycle {
@@ -62,7 +62,7 @@ object Room {
 }
 
 object Compose {
-    const val composeVersion = "1.0.0-alpha04"
+    const val composeVersion = "1.0.0-alpha05"
     const val ui =  "androidx.compose.ui:ui:$composeVersion"
     const val material =  "androidx.compose.material:material:$composeVersion"
     const val uiTooling = "androidx.ui:ui-tooling:$composeVersion"

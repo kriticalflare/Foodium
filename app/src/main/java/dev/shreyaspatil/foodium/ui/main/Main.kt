@@ -164,7 +164,7 @@ private fun PostsItem(post: Post, onPostClicked: (Post) -> Unit) {
     ) {
         Column(modifier = Modifier.width(screenWidth.dp).padding(start = 8.dp)) {
             Text(post.title ?: "")
-            ProvideEmphasis(emphasis = EmphasisAmbient.current.medium) {
+            ProvideEmphasis(emphasis = AmbientEmphasisLevels.current.medium) {
                 Text(post.author ?: "", style = MaterialTheme.typography.body2)
             }
         }
